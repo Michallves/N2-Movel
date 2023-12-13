@@ -1,24 +1,27 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:reservadequadras/models/enums/status_enum.dart';
 import 'package:reservadequadras/models/reservation.dart';
+import 'package:http/http.dart' as http;
 
-
-class ReservationFormScreen extends StatefulWidget {
+class AddReservationPage extends StatefulWidget {
   final Reservation? initialReservation;
 
-  ReservationFormScreen({this.initialReservation});
+  AddReservationPage({this.initialReservation});
 
   @override
-  _ReservationFormScreenState createState() => _ReservationFormScreenState();
+  _AddReservationPageState createState() => _AddReservationPageState();
 }
 
-class _ReservationFormScreenState extends State<ReservationFormScreen> {
+class _AddReservationPageState extends State<AddReservationPage> {
   final _formKey = GlobalKey<FormState>();
   final _courtNameController = TextEditingController();
   final _timeController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   final _locationController = TextEditingController();
-  Status _selectedStatus = Status.Livre;
 
   bool isHovered = false;
 
@@ -28,9 +31,8 @@ class _ReservationFormScreenState extends State<ReservationFormScreen> {
     if (widget.initialReservation != null) {
       _courtNameController.text = widget.initialReservation!.courtName;
       _timeController.text = widget.initialReservation!.time;
-      _selectedDate = widget.initialReservation!.date;
+      _selectedDate = DateTime.parse(widget.initialReservation!.date);
       _locationController.text = widget.initialReservation!.location;
-      _selectedStatus = widget.initialReservation!.status;
     }
   }
 
@@ -46,6 +48,24 @@ class _ReservationFormScreenState extends State<ReservationFormScreen> {
       setState(() {
         _selectedDate = DateTime(picked.year, picked.month, picked.day);
       });
+    }
+  }
+
+  Future<void> postReservation(Reservation reservation) async {
+    const String apiUrl = 'http://localhost:3000/reservations';
+
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(reservation.toMap()),
+    );
+    if (response.statusCode == 201) {
+      print('Reserva adicionada com sucesso');
+    } else {
+      print(
+          'Falha ao adicionar a reserva. Código de status: ${response.statusCode}');
     }
   }
 
@@ -95,50 +115,23 @@ class _ReservationFormScreenState extends State<ReservationFormScreen> {
                 },
               ),
               SizedBox(height: 16),
-              DropdownButtonFormField<Status>(
-                value: _selectedStatus,
-                onChanged: (Status? value) {
-                  if (value != null) {
-                    setState(() {
-                      _selectedStatus = value;
-                    });
-                  }
-                },
-                items: Status.values.map((status) {
-                  return DropdownMenuItem<Status>(
-                    value: status,
-                    child: Text(status.toString().split('.').last),
-                  );
-                }).toList(),
-                decoration: InputDecoration(labelText: 'Status'),
-              ),
-              Row(
-                children: [
-                  Text(
-                      'Data: ${DateFormat('yyyy-MM-dd').format(_selectedDate)}'),
-                  IconButton(
-                    onPressed: () => _selectDate(context),
-                    icon: Icon(Icons.calendar_today),
-                    iconSize: 20.0,
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
               Center(
                 child: MouseRegion(
                   onEnter: (_) => setState(() => isHovered = true),
                   onExit: (_) => setState(() => isHovered = false),
                   child: InkWell(
-                    onTap: () {
+                    onTap: () async {
                       if (_formKey.currentState!.validate()) {
                         final newReservation = Reservation(
                           courtName: _courtNameController.text,
                           time: _timeController.text,
-                          date: _selectedDate,
+                          date: _selectedDate.toIso8601String(),
                           location: _locationController.text,
-                          status: _selectedStatus,
+                          status: Status.Reserved,
+                          id: 0,
                         );
-                        Navigator.pop(context, newReservation);
+                        await postReservation(newReservation);
+                        context.pushReplacement("/reservations");
                       }
                     },
                     child: Container(

@@ -1,0 +1,52 @@
+{
+  "reservations": [
+    {
+      "name": "Tennis Court 1",
+      "date": "2023-12-01 00:00:00.000Z",
+      "location": "Sports Center",
+      "status": "Free",
+      "time": "10:00 AM",
+      "id": 1
+    },
+    {
+      "name": "Football Test",
+      "date": "2023-12-30 00:00:00.000",
+      "location": "Stadium",
+      "status": "Occupied",
+      "time": "5:45 PM",
+      "id": 3
+    },
+    {
+      "name": "asdasd",
+      "date": "2023-12-30 00:00:00.000",
+      "location": "caninde",
+      "status": "Reserved",
+      "time": "5:45 PM",
+      "id": 4
+    },
+    {
+      "name": "Test",
+      "time": "22",
+      "date": "2023-12-13T00:47:20.939",
+      "location": "Caninde",
+      "status": "Reserved",
+      "id": 5
+    },
+    {
+      "name": "Test",
+      "time": "22",
+      "date": "2023-12-13T00:47:43.858",
+      "location": "caninde",
+      "status": "Reserved",
+      "id": 6
+    },
+    {
+      "name": "Test",
+      "time": "22",
+      "date": "2023-12-13T00:51:00.168",
+      "location": "caninde",
+      "status": "Reserved",
+      "id": 7
+    }
+  ]
+}
